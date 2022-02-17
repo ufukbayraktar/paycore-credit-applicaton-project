@@ -2,6 +2,7 @@ package com.patika.paycore.model.request;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.Min;
@@ -11,6 +12,7 @@ import java.math.BigDecimal;
 
 @Getter
 @Builder
+@ToString
 public class UserCreateRequest {
 
     @NotNull(message = "Identity number can not be empty.")

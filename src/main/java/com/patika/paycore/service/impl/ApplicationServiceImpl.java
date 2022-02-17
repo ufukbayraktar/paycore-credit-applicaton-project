@@ -4,10 +4,12 @@ import com.patika.paycore.entity.Application;
 import com.patika.paycore.entity.User;
 import com.patika.paycore.enums.ApplicationStatus;
 import com.patika.paycore.model.request.ApplicationRequest;
+import com.patika.paycore.model.request.SmsRequest;
 import com.patika.paycore.model.response.ApplicationResponse;
 import com.patika.paycore.repository.ApplicationRepository;
 import com.patika.paycore.repository.UserRepository;
 import com.patika.paycore.service.ApplicationService;
+import com.patika.paycore.service.NotificationService;
 import com.patika.paycore.service.ScoreService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +30,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     private static final BigDecimal creditMultiplier = new BigDecimal(4);
 
     private final ScoreService scoreService;
+    private final NotificationService notificationService;
     private final UserRepository userRepository;
     private final ApplicationRepository applicationRepository;
 
@@ -74,6 +77,14 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .build();
         applicationRepository.save(application);
         log.info("Application saved successfully: {}", application);
+
+        SmsRequest smsRequest = SmsRequest.builder()
+                .applicationStatus(application.getApplicationStatus())
+                .creditLimit(application.getCreditLimit())
+                .phoneNumber(userPresent.getPhoneNumber())
+                .build();
+        notificationService.sendCreditStatusSms(smsRequest);
+
 
         return response;
     }

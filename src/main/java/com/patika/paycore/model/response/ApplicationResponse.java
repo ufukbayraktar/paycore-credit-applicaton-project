@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-
+@ToString
 public class ApplicationResponse {
     private ApplicationStatus status;
     private BigDecimal creditLimit;
