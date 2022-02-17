@@ -6,8 +6,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class PaycoreCreditApplicationService {
 
-	public static void main(String[] args) {
-		SpringApplication.run(PaycoreCreditApplicationService.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(PaycoreCreditApplicationService.class, args);
+    }
 
 }

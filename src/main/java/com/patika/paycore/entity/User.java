@@ -17,7 +17,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "users")
-public class User  extends BaseEntity {
+public class User extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq_gen")
@@ -25,7 +25,7 @@ public class User  extends BaseEntity {
     private Long id;
 
     @NotNull(message = "Identity number can not be empty.")
-    @Length(min = 11, max = 11,message = "Identity number must have 11 characters.")
+    @Length(min = 11, max = 11, message = "Identity number must have 11 characters.")
     private String identityNumber;
 
     @NotEmpty(message = "Name can not be empty.")

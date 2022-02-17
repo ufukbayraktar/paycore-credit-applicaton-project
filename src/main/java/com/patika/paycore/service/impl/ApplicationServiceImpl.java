@@ -9,10 +9,8 @@ import com.patika.paycore.repository.ApplicationRepository;
 import com.patika.paycore.repository.UserRepository;
 import com.patika.paycore.service.ApplicationService;
 import com.patika.paycore.service.ScoreService;
-import com.patika.paycore.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -25,7 +23,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ApplicationServiceImpl  implements ApplicationService {
+public class ApplicationServiceImpl implements ApplicationService {
 
     private static final BigDecimal creditMultiplier = new BigDecimal(4);
 
@@ -39,16 +37,16 @@ public class ApplicationServiceImpl  implements ApplicationService {
     public ApplicationResponse createApplication(ApplicationRequest request) {
         Long score = scoreService.getScore(request.getIdentityNumber());
         ApplicationResponse response = new ApplicationResponse();
-        if(score < 500) {
+        if (score < 500) {
             response.setStatus(ApplicationStatus.REJECTED);
             response.setCreditLimit(new BigDecimal(0));
-        } else if (score>=500 && score<1000 && BigDecimal.valueOf(5000).compareTo(request.getSalary()) > 0 ) {
+        } else if (score >= 500 && score < 1000 && BigDecimal.valueOf(5000).compareTo(request.getSalary()) > 0) {
             response.setStatus(ApplicationStatus.CONFIRMED);
             response.setCreditLimit(new BigDecimal(10000));
-        } else if  (score>=500 && score<1000 && BigDecimal.valueOf(5000).compareTo(request.getSalary()) < 0 ) {
+        } else if (score >= 500 && score < 1000 && BigDecimal.valueOf(5000).compareTo(request.getSalary()) < 0) {
             response.setStatus(ApplicationStatus.CONFIRMED);
             response.setCreditLimit(new BigDecimal(20000));
-        } else if (score>=1000) {
+        } else if (score >= 1000) {
             BigDecimal creditLimit = request.getSalary().multiply(creditMultiplier);
             response.setStatus(ApplicationStatus.CONFIRMED);
             response.setCreditLimit(creditLimit);
@@ -59,7 +57,7 @@ public class ApplicationServiceImpl  implements ApplicationService {
             userPresent = user.get();
             userPresent.setSalary(request.getSalary());
             userPresent.setPhoneNumber(request.getPhoneNumber());
-        }else {
+        } else {
             userPresent = User.builder()
                     .identityNumber(request.getIdentityNumber())
                     .name(request.getName())
@@ -75,7 +73,7 @@ public class ApplicationServiceImpl  implements ApplicationService {
                 .creditLimit(response.getCreditLimit())
                 .build();
         applicationRepository.save(application);
-        log.info("Application saved successfully: {}",application);
+        log.info("Application saved successfully: {}", application);
 
         return response;
     }
@@ -83,7 +81,7 @@ public class ApplicationServiceImpl  implements ApplicationService {
     @Override
     public List<ApplicationResponse> getStatus(String identityNumber) {
         List<Application> applicationList = applicationRepository.findByUserIdentityNumber(identityNumber);
-        if(!applicationList.isEmpty()) {
+        if (!applicationList.isEmpty()) {
             List<ApplicationResponse> applicationResponseList = new ArrayList<>();
             applicationList.forEach(application -> {
                 ApplicationResponse applicationResponse = ApplicationResponse.builder()
@@ -93,7 +91,7 @@ public class ApplicationServiceImpl  implements ApplicationService {
                 applicationResponseList.add(applicationResponse);
             });
 
-            log.info("Applications found: {}",applicationList);
+            log.info("Applications found: {}", applicationList);
             return applicationResponseList;
 
         } else {

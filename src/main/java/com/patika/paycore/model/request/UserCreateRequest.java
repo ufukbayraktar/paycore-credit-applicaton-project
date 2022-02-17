@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 public class UserCreateRequest {
 
     @NotNull(message = "Identity number can not be empty.")
-    @Length(min = 11, max = 11,message = "Identity number must have 11 characters.")
+    @Length(min = 11, max = 11, message = "Identity number must have 11 characters.")
     private String identityNumber;
 
     @NotEmpty(message = "Name can not be empty.")

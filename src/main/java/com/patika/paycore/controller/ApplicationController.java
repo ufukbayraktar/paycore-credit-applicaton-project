@@ -1,13 +1,9 @@
 package com.patika.paycore.controller;
 
-import com.patika.paycore.entity.Application;
-import com.patika.paycore.entity.User;
 import com.patika.paycore.model.ApiResponse;
 import com.patika.paycore.model.request.ApplicationRequest;
 import com.patika.paycore.model.response.ApplicationResponse;
-import com.patika.paycore.model.response.UserResponse;
 import com.patika.paycore.service.ApplicationService;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -22,9 +18,10 @@ import java.util.List;
 public class ApplicationController {
     //POST MAPPING CreateRequest
     private final ApplicationService applicationService;
+
     @PostMapping("/create")
-    public ApiResponse<ApplicationResponse> createApplication (@Valid @RequestBody ApplicationRequest request){
-        log.info("createApplication called with request: {}",request);
+    public ApiResponse<ApplicationResponse> createApplication(@Valid @RequestBody ApplicationRequest request) {
+        log.info("createApplication called with request: {}", request);
         ApplicationResponse response = applicationService.createApplication(request);
         return ApiResponse.<ApplicationResponse>builder()
                 .data(response)
@@ -35,7 +32,7 @@ public class ApplicationController {
     }
 
     @GetMapping("/get-status/{identityNumber}")
-    public ApiResponse<List<ApplicationResponse>> getStatus (@PathVariable String identityNumber) {
+    public ApiResponse<List<ApplicationResponse>> getStatus(@PathVariable String identityNumber) {
         log.info("getStatus called with this identityNumber: {}", identityNumber);
         List<ApplicationResponse> response = applicationService.getStatus(identityNumber);
         return ApiResponse.<List<ApplicationResponse>>builder()

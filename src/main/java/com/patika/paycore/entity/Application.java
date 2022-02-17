@@ -1,7 +1,6 @@
 package com.patika.paycore.entity;
 
 import com.patika.paycore.enums.ApplicationStatus;
-
 import lombok.*;
 
 import javax.persistence.*;
@@ -21,7 +20,7 @@ public class Application extends BaseEntity {
     private Long id;
 
 
-    @ManyToOne(fetch = FetchType.LAZY,cascade=CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @ToString.Exclude
     private User user;
 

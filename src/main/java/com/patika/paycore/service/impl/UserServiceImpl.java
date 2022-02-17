@@ -1,7 +1,6 @@
 package com.patika.paycore.service.impl;
 
 import com.patika.paycore.entity.User;
-import com.patika.paycore.model.ApiResponse;
 import com.patika.paycore.model.request.UserCreateRequest;
 import com.patika.paycore.model.request.UserUpdateRequest;
 import com.patika.paycore.model.response.UserResponse;
@@ -10,7 +9,6 @@ import com.patika.paycore.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
 import javax.transaction.Transactional;
 import java.util.Optional;
@@ -32,7 +30,7 @@ public class UserServiceImpl implements UserService {
                 .salary(request.getSalary())
                 .build();
         userRepository.save(user);
-        log.info("User saved: {}",user);
+        log.info("User saved: {}", user);
         return UserResponse.builder()
                 .identityNumber(user.getIdentityNumber())
                 .name(user.getName())
@@ -53,7 +51,7 @@ public class UserServiceImpl implements UserService {
             userPresent.setPhoneNumber(request.getPhoneNumber());
             userPresent.setSalary(request.getSalary());
             userRepository.save(userPresent);
-            log.info("User updated: {}",userPresent);
+            log.info("User updated: {}", userPresent);
             return UserResponse.builder()
                     .identityNumber(userPresent.getIdentityNumber())
                     .name(userPresent.getName())
@@ -77,7 +75,7 @@ public class UserServiceImpl implements UserService {
             userRepository.delete(userPresent);
             log.info("User deleted: {}", userPresent);
         } else {
-            log.info("User not found for given identity number: {}",identityNumber);
+            log.info("User not found for given identity number: {}", identityNumber);
         }
     }
 
