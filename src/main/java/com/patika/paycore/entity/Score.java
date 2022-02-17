@@ -5,10 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Builder
 @NoArgsConstructor
@@ -19,7 +16,8 @@ import javax.persistence.Table;
 public class Score extends BaseEntity {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "score_seq_gen")
+    @SequenceGenerator(name = "score_seq_gen", sequenceName = "score_seq", allocationSize = 1)
     private Long id;
 
     private String identityNumber;

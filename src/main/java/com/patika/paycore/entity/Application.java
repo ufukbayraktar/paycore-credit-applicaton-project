@@ -16,7 +16,8 @@ import java.math.BigDecimal;
 public class Application extends BaseEntity {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "application_seq_gen")
+    @SequenceGenerator(name = "application_seq_gen", sequenceName = "application_seq", allocationSize = 1)
     private Long id;
 
 
