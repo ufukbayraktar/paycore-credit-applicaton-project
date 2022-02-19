@@ -1,6 +1,8 @@
 package com.patika.paycore.service.impl;
 
 import com.patika.paycore.entity.User;
+import com.patika.paycore.exception.ApiErrorType;
+import com.patika.paycore.exception.UserNotFoundException;
 import com.patika.paycore.model.request.UserCreateRequest;
 import com.patika.paycore.model.request.UserUpdateRequest;
 import com.patika.paycore.model.response.UserResponse;
@@ -60,8 +62,9 @@ public class UserServiceImpl implements UserService {
                     .salary(userPresent.getSalary())
                     .build();
         } else {
-            // TODO: handle user not found exception
-            return null;
+            throw new UserNotFoundException(ApiErrorType.USER_NOT_FOUND_ERROR.getErrorCode(),
+                    ApiErrorType.USER_NOT_FOUND_ERROR.getErrorMessage(),
+                    ApiErrorType.INTERNAL_SERVER_ERROR.getHttpStatus());
         }
     }
 
@@ -93,8 +96,9 @@ public class UserServiceImpl implements UserService {
                     .salary(userPresent.getSalary())
                     .build();
         } else {
-            // TODO: handle user not found exception
-            return null;
+            throw new UserNotFoundException(ApiErrorType.USER_NOT_FOUND_ERROR.getErrorCode(),
+                    ApiErrorType.USER_NOT_FOUND_ERROR.getErrorMessage(),
+                    ApiErrorType.INTERNAL_SERVER_ERROR.getHttpStatus());
         }
     }
 

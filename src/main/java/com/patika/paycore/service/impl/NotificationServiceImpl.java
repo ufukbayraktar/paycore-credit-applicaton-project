@@ -14,8 +14,8 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void sendCreditStatusSms(SmsRequest request) {
 
-        log.info("Sending sms to number : {} ",request.getPhoneNumber());
-        log.info("Your credit application status is {} and your credit limit is {} ",request.getApplicationStatus(),request.getCreditLimit());
+        log.info("Sending sms to number : {} ", request.getPhoneNumber());
+        log.info("Your credit application status is {} and your credit limit is {} ", request.getApplicationStatus(), request.getCreditLimit());
 
     }
 }
