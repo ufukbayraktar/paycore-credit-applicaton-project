@@ -1,0 +1,7 @@
+services:
+  paycore-credit-application-project:
+    build: .
+    image: paycore-credit-application-project
+    ports:
+      - "8080:8080"
+    restart: on-failure
