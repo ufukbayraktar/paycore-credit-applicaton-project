@@ -1,17 +1,18 @@
 package com.patika.paycore.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.patika.paycore.TestInitializer;
-import com.patika.paycore.entity.User;
+import com.patika.paycore.enums.ApplicationStatus;
 import com.patika.paycore.model.ApiResponse;
-import com.patika.paycore.model.request.UserCreateRequest;
-import com.patika.paycore.model.request.UserUpdateRequest;
+import com.patika.paycore.model.request.ApplicationRequest;
+import com.patika.paycore.model.response.ApplicationResponse;
 import com.patika.paycore.model.response.UserResponse;
 import com.patika.paycore.repository.ApplicationRepository;
 import com.patika.paycore.repository.UserRepository;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,16 +23,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-
-
 import java.math.BigDecimal;
-import java.util.Optional;
-
+import java.util.List;
 
 @ContextConfiguration(initializers = TestInitializer.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class UserControllerTest {
-
+public class ApplicationControllerTest {
 
     @Autowired
     TestRestTemplate restTemplate;
@@ -47,104 +44,86 @@ public class UserControllerTest {
 
     ObjectMapper objectMapper;
 
-    @Value("${app.security.user.name}")
-    private String userName;
-
-    @Value("${app.security.user.password}")
-    private String password;
-
-
     @BeforeEach
     void init() {
         objectMapper = new ObjectMapper();
         objectMapper.findAndRegisterModules();
         generateUsersApplicationsAndScores();
+
     }
 
     @AfterEach
-    void tearDown() {
-        clearDatabases();
-    }
+    void tearDown() { clearDatabases(); }
 
     @Test
-    public void createUsersShouldReturnUserResponseWhenRequestIsValid() {
-        // Arrange
-        UserCreateRequest userCreateRequest = UserCreateRequest.builder()
-                .identityNumber("12345678910")
-                .name("sample-name")
-                .surname("sample-surname")
-                .phoneNumber("5685681144")
-                .salary(new BigDecimal(5000))
-                .build();
+    public void createApplicationShouldReturnRejectedApplicationResponseWhenRequestIsValid() {
+
+        //Arrange
+        ApplicationRequest applicationRequest = ApplicationRequest.builder()
+                .identityNumber("11111111113")
+                .name("name3")
+                .surname("surname3")
+                .phoneNumber("7777777777")
+                .salary(new BigDecimal("77000")).build();
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         httpHeaders.add(HttpHeaders.ACCEPT,MediaType.APPLICATION_JSON_VALUE);
 
-        HttpEntity<Object> request = new HttpEntity<>(userCreateRequest,httpHeaders);
+        HttpEntity<Object> request = new HttpEntity<>(applicationRequest,httpHeaders);
 
-        // Act
-        ResponseEntity<ApiResponse> responseEntity = restTemplate.withBasicAuth(userName,password).postForEntity("/api/user/create",request,ApiResponse.class);
-        UserResponse userResponse = objectMapper.convertValue(responseEntity.getBody().getData(),UserResponse.class);
+        //Act
+        ResponseEntity<ApiResponse> responseEntity = restTemplate.postForEntity("/api/application/create",request,ApiResponse.class);
+        ApplicationResponse applicationResponse = objectMapper.convertValue(responseEntity.getBody().getData(),ApplicationResponse.class);
 
-        // Assert
+        //Assert
         assertEquals(HttpStatus.OK,responseEntity.getStatusCode());
-        assertEquals("sample-name",userResponse.getName());
-        assertEquals(new BigDecimal(5000),userResponse.getSalary());
-    }
+        assertEquals(ApplicationStatus.REJECTED,applicationResponse.getStatus());
+        assertEquals(new BigDecimal("0"),applicationResponse.getCreditLimit());
 
+    }
     @Test
-    public void updateUsersShouldReturnUserResponseWhenRequestIsValid() {
-        // Arrange
-        UserUpdateRequest userUpdateRequest = UserUpdateRequest.builder()
+    public void createApplicationShouldReturnConfirmedApplicationResponseWhenRequestIsValid() {
+        //Arrange
+        ApplicationRequest applicationRequest = ApplicationRequest.builder()
                 .identityNumber("11111111111")
-                .name("sample-update-name")
-                .surname("sample-update-surname")
-                .phoneNumber("3333333333")
-                .salary(new BigDecimal(23000))
-                .build();
+                .name("name1")
+                .surname("surname1")
+                .phoneNumber("5555555555")
+                .salary(new BigDecimal("55000.00")).build();
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         httpHeaders.add(HttpHeaders.ACCEPT,MediaType.APPLICATION_JSON_VALUE);
 
-        HttpEntity<Object> request = new HttpEntity<>(userUpdateRequest,httpHeaders);
+        HttpEntity<Object> request = new HttpEntity<>(applicationRequest,httpHeaders);
 
-        // Act
-        ResponseEntity<ApiResponse> responseEntity = restTemplate.withBasicAuth(userName,password).exchange("/api/user/update",HttpMethod.PUT,request,ApiResponse.class);
-        UserResponse userResponse = objectMapper.convertValue(responseEntity.getBody().getData(),UserResponse.class);
+        //Act
+        ResponseEntity<ApiResponse> responseEntity = restTemplate.postForEntity("/api/application/create",request,ApiResponse.class);
+        ApplicationResponse applicationResponse = objectMapper.convertValue(responseEntity.getBody().getData(),ApplicationResponse.class);
 
-        // Assert
+        //Assert
         assertEquals(HttpStatus.OK,responseEntity.getStatusCode());
-        assertEquals("sample-update-name",userResponse.getName());
-        assertEquals(new BigDecimal(23000),userResponse.getSalary());
+        assertEquals(ApplicationStatus.CONFIRMED,applicationResponse.getStatus());
+        assertEquals(new BigDecimal("20000"),applicationResponse.getCreditLimit());
+
     }
 
     @Test
-    public void deleteUserShouldDeleteUserByIdentityNumberWhenRequestIsValid() {
+    public void getStatusShouldReturnConfirmedApplicationResponseWhenRequestIsValid() {
         //Arrange
 
         //Act
-        ResponseEntity<ApiResponse> responseEntity = restTemplate.withBasicAuth(userName,password).exchange("/api/user/delete/11111111111",HttpMethod.DELETE,null,ApiResponse.class);
-        Optional<User> user = userRepository.findByIdentityNumber("11111111111");
-
-        //Assert
-        assertEquals(false, user.isPresent());
-
-    }
-
-    @Test
-    public void getUsersShouldReturnUserResponseWhenRequestIsValid(){
-        // Arrange
-
-        //Act
-        ResponseEntity<ApiResponse> responseEntity = restTemplate.withBasicAuth(userName,password).getForEntity("/api/user/getUser/11111111111",ApiResponse.class);
-        UserResponse userResponse = objectMapper.convertValue(responseEntity.getBody().getData(),UserResponse.class);
-
+        ResponseEntity<ApiResponse> responseEntity = restTemplate.getForEntity("/api/application/get-status/11111111111",ApiResponse.class);
+        List<ApplicationResponse> applicationResponses = objectMapper.convertValue(responseEntity.getBody().getData(), new TypeReference<List<ApplicationResponse>>() {});
 
         //Assert
         assertEquals(HttpStatus.OK,responseEntity.getStatusCode());
-        assertEquals("name1",userResponse.getName());
-        assertEquals(new BigDecimal("55000.0"),userResponse.getSalary());
+        assertEquals(2,applicationResponses.size());
+        assertEquals(ApplicationStatus.CONFIRMED,applicationResponses.get(0).getStatus());
+        assertEquals(ApplicationStatus.CONFIRMED,applicationResponses.get(1).getStatus());
+        assertEquals(new BigDecimal("20000.0"),applicationResponses.get(0).getCreditLimit());
+        assertEquals(new BigDecimal("50000.0"),applicationResponses.get(1).getCreditLimit());
     }
+
 
     private void generateUsersApplicationsAndScores() {
         String userSql = "INSERT INTO users" +
@@ -171,7 +150,10 @@ public class UserControllerTest {
                 "VALUES(3, now(), NULL, 0, 0, 0.00, 3);" +
                 "INSERT INTO application" +
                 "(id, created_date, updated_date, version, application_status, credit_limit, user_id)" +
-                "VALUES(4, now(), NULL, 0, 0, 0.00, 4);";
+                "VALUES(4, now(), NULL, 0, 0, 0.00, 4);" +
+                "INSERT INTO application" +
+                "(id, created_date, updated_date, version, application_status, credit_limit, user_id)" +
+                "VALUES(5, now(), NULL, 0, 1, 50000.00, 1);" ;
 
         String scoreSql = "INSERT INTO score" +
                 "(id, created_date, updated_date, version, identity_number, score)" +

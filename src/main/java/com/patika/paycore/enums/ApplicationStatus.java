@@ -3,8 +3,9 @@ package com.patika.paycore.enums;
 import java.util.stream.Stream;
 
 public enum ApplicationStatus {
-    CONFIRMED(1),
-    REJECTED(0);
+    REJECTED(0),
+    CONFIRMED(1);
+
 
     private final int status;
 

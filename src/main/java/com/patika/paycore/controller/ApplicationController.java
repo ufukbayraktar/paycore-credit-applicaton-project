@@ -16,7 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class ApplicationController {
-    //POST MAPPING CreateRequest
+
     private final ApplicationService applicationService;
 
     @PostMapping("/create")
