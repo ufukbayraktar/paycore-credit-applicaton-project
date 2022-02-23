@@ -8,7 +8,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 public class TestInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     private static final int POSTGRESQL_PORT = 5432;
-    static PostgreSQLContainer postgreSQLContainer = new PostgreSQLContainer<>("postgres:13-alpine")
+    static PostgreSQLContainer postgreSQLContainer = new PostgreSQLContainer<>("postgres:14.0")
             .withUsername("sample-username")
             .withPassword("sample-password")
             .withInitScript("schema-test.sql")
