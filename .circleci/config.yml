@@ -13,6 +13,11 @@ jobs:
     # A list of available CircleCI Docker Convenience Images are available here: https://circleci.com/developer/images/image/cimg/openjdk
     docker:
       - image: cimg/openjdk:11.0
+      - image: cimg/postgres:14.0
+        environment:
+          POSTGRES_USER: sample-username
+          POSTGRES_DB: test
+          POSTGRES_PASSWORD: sample-password
     # Add steps to the job
     # See: https://circleci.com/docs/2.0/configuration-reference/#steps
     steps:
