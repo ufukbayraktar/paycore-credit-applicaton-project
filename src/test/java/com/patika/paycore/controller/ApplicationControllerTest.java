@@ -124,7 +124,6 @@ public class ApplicationControllerTest {
         assertEquals(new BigDecimal("50000.0"),applicationResponses.get(1).getCreditLimit());
     }
 
-
     private void generateUsersApplicationsAndScores() {
         String userSql = "INSERT INTO users" +
                 "(id, created_date, updated_date, version, identity_number, name, phone_number, salary, surname)" +
