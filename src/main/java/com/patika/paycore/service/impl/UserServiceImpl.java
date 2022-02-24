@@ -64,7 +64,7 @@ public class UserServiceImpl implements UserService {
         } else {
             throw new UserNotFoundException(ApiErrorType.USER_NOT_FOUND_ERROR.getErrorCode(),
                     ApiErrorType.USER_NOT_FOUND_ERROR.getErrorMessage(),
-                    ApiErrorType.INTERNAL_SERVER_ERROR.getHttpStatus());
+                    ApiErrorType.USER_NOT_FOUND_ERROR.getHttpStatus());
         }
     }
 
@@ -78,7 +78,9 @@ public class UserServiceImpl implements UserService {
             userRepository.delete(userPresent);
             log.info("User deleted: {}", userPresent);
         } else {
-            log.info("User not found for given identity number: {}", identityNumber);
+            throw new UserNotFoundException(ApiErrorType.USER_NOT_FOUND_ERROR.getErrorCode(),
+                    ApiErrorType.USER_NOT_FOUND_ERROR.getErrorMessage(),
+                    ApiErrorType.USER_NOT_FOUND_ERROR.getHttpStatus());
         }
     }
 
@@ -98,7 +100,7 @@ public class UserServiceImpl implements UserService {
         } else {
             throw new UserNotFoundException(ApiErrorType.USER_NOT_FOUND_ERROR.getErrorCode(),
                     ApiErrorType.USER_NOT_FOUND_ERROR.getErrorMessage(),
-                    ApiErrorType.INTERNAL_SERVER_ERROR.getHttpStatus());
+                    ApiErrorType.USER_NOT_FOUND_ERROR.getHttpStatus());
         }
     }
 
