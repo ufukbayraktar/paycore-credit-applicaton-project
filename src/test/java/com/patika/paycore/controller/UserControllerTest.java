@@ -3,6 +3,7 @@ package com.patika.paycore.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.patika.paycore.TestInitializer;
 import com.patika.paycore.entity.User;
+import com.patika.paycore.model.ApiErrorResponse;
 import com.patika.paycore.model.ApiResponse;
 import com.patika.paycore.model.request.UserCreateRequest;
 import com.patika.paycore.model.request.UserUpdateRequest;
@@ -20,11 +21,17 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
+
+import javax.servlet.http.HttpServletResponse;
+
+import static com.patika.paycore.exception.ApiErrorType.FIELD_VALIDATION_ERROR;
+import static com.patika.paycore.exception.ApiErrorType.USER_NOT_FOUND_ERROR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 
 import java.math.BigDecimal;
+import java.util.LinkedHashMap;
 import java.util.Optional;
 
 
@@ -93,6 +100,57 @@ public class UserControllerTest {
     }
 
     @Test
+    public void createUsersShouldReturnUnauthorizedWhenWithoutBasicAuth() {
+        // Arrange
+        UserCreateRequest userCreateRequest = UserCreateRequest.builder()
+                .identityNumber("12345678910")
+                .name("sample-name")
+                .surname("sample-surname")
+                .phoneNumber("5685681144")
+                .salary(new BigDecimal(5000))
+                .build();
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        httpHeaders.add(HttpHeaders.ACCEPT,MediaType.APPLICATION_JSON_VALUE);
+
+        HttpEntity<Object> request = new HttpEntity<>(userCreateRequest,httpHeaders);
+
+        // Act
+        ResponseEntity<Object> responseEntity = restTemplate.postForEntity("/api/user/create",request,Object.class);
+        LinkedHashMap<String,String> responseBodyLinkedHashMap = (LinkedHashMap<String, String>) responseEntity.getBody();
+
+        // Assert
+        assertEquals(HttpStatus.UNAUTHORIZED,responseEntity.getStatusCode());
+        assertEquals("Authentication Exception",responseBodyLinkedHashMap.get("errorMessage"));
+        assertEquals(String.valueOf(2003),responseBodyLinkedHashMap.get("errorCode"));
+        assertEquals(HttpStatus.UNAUTHORIZED.toString(),responseBodyLinkedHashMap.get("errorHttpStatus"));
+    }
+    @Test
+    public void createUsersShouldReturnBadRequestWhenRequestIsInvalid() {
+        // Arrange
+        UserCreateRequest userCreateRequest = UserCreateRequest.builder()
+                .identityNumber("12345678910")
+                .surname("sample-surname")
+                .phoneNumber("5685681144")
+                .salary(new BigDecimal(5000))
+                .build();
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        httpHeaders.add(HttpHeaders.ACCEPT,MediaType.APPLICATION_JSON_VALUE);
+
+        HttpEntity<Object> request = new HttpEntity<>(userCreateRequest,httpHeaders);
+
+        // Act
+        ResponseEntity<ApiErrorResponse> responseEntity = restTemplate.withBasicAuth(userName,password).postForEntity("/api/user/create",request,ApiErrorResponse.class);
+        ApiErrorResponse apiErrorResponse = objectMapper.convertValue(responseEntity.getBody(),ApiErrorResponse.class);
+
+        // Assert
+        assertEquals(HttpStatus.BAD_REQUEST,responseEntity.getStatusCode());
+        assertEquals(FIELD_VALIDATION_ERROR.getErrorCode(),Integer.valueOf(apiErrorResponse.getCode()));
+        assertEquals(FIELD_VALIDATION_ERROR.getErrorMessage(),apiErrorResponse.getMessage());
+    }
+
+    @Test
     public void updateUsersShouldReturnUserResponseWhenRequestIsValid() {
         // Arrange
         UserUpdateRequest userUpdateRequest = UserUpdateRequest.builder()
@@ -119,6 +177,57 @@ public class UserControllerTest {
     }
 
     @Test
+    public void updateUsersShouldReturnUnauthorizedWhenWithoutBasicAuth() {
+        // Arrange
+        UserUpdateRequest userUpdateRequest = UserUpdateRequest.builder()
+                .identityNumber("11111111111")
+                .name("sample-update-name")
+                .surname("sample-update-surname")
+                .phoneNumber("3333333333")
+                .salary(new BigDecimal(23000))
+                .build();
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        httpHeaders.add(HttpHeaders.ACCEPT,MediaType.APPLICATION_JSON_VALUE);
+
+        HttpEntity<Object> request = new HttpEntity<>(userUpdateRequest,httpHeaders);
+
+        // Act
+        ResponseEntity<Object> responseEntity = restTemplate.exchange("/api/user/update",HttpMethod.PUT,request,Object.class);
+        LinkedHashMap<String,String> responseBodyLinkedHashMap = (LinkedHashMap<String, String>) responseEntity.getBody();
+
+        // Assert
+        assertEquals(HttpStatus.UNAUTHORIZED,responseEntity.getStatusCode());
+        assertEquals("Authentication Exception",responseBodyLinkedHashMap.get("errorMessage"));
+        assertEquals(String.valueOf(2003),responseBodyLinkedHashMap.get("errorCode"));
+        assertEquals(HttpStatus.UNAUTHORIZED.toString(),responseBodyLinkedHashMap.get("errorHttpStatus"));
+    }
+    @Test
+    public void updateUsersShouldReturnBadRequestWhenRequestIsInvalid() {
+        // Arrange
+        UserUpdateRequest userUpdateRequest = UserUpdateRequest.builder()
+                .name("sample-update-name")
+                .surname("sample-update-surname")
+                .phoneNumber("3333333333")
+                .salary(new BigDecimal(23000))
+                .build();
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        httpHeaders.add(HttpHeaders.ACCEPT,MediaType.APPLICATION_JSON_VALUE);
+
+        HttpEntity<Object> request = new HttpEntity<>(userUpdateRequest,httpHeaders);
+
+        // Act
+        ResponseEntity<ApiErrorResponse> responseEntity = restTemplate.withBasicAuth(userName,password).exchange("/api/user/update",HttpMethod.PUT,request,ApiErrorResponse.class);
+        ApiErrorResponse apiErrorResponse = objectMapper.convertValue(responseEntity.getBody(),ApiErrorResponse.class);
+
+        // Assert
+        assertEquals(HttpStatus.BAD_REQUEST,responseEntity.getStatusCode());
+        assertEquals(FIELD_VALIDATION_ERROR.getErrorCode(),Integer.valueOf(apiErrorResponse.getCode()));
+        assertEquals(FIELD_VALIDATION_ERROR.getErrorMessage(),apiErrorResponse.getMessage());
+    }
+
+    @Test
     public void deleteUserShouldDeleteUserByIdentityNumberWhenRequestIsValid() {
         //Arrange
 
@@ -128,6 +237,37 @@ public class UserControllerTest {
 
         //Assert
         assertEquals(false, user.isPresent());
+
+    }
+
+    @Test
+    public void deleteUserShouldReturnUnauthorizedWhenWithoutBasicAuth() {
+        //Arrange
+
+        //Act
+        ResponseEntity<Object> responseEntity = restTemplate.exchange("/api/user/delete/11111111111",HttpMethod.DELETE,null,Object.class);
+        LinkedHashMap<String,String> responseBodyLinkedHashMap = (LinkedHashMap<String, String>) responseEntity.getBody();
+
+        // Assert
+        assertEquals(HttpStatus.UNAUTHORIZED,responseEntity.getStatusCode());
+        assertEquals("Authentication Exception",responseBodyLinkedHashMap.get("errorMessage"));
+        assertEquals(String.valueOf(2003),responseBodyLinkedHashMap.get("errorCode"));
+        assertEquals(HttpStatus.UNAUTHORIZED.toString(),responseBodyLinkedHashMap.get("errorHttpStatus"));
+
+    }
+
+    @Test
+    public void deleteUserShouldReturnNotFoundWhenRequestIsInvalid() {
+        //Arrange
+
+        //Act
+        ResponseEntity<ApiErrorResponse> responseEntity = restTemplate.withBasicAuth(userName,password).exchange("/api/user/delete/23232323232",HttpMethod.DELETE,null,ApiErrorResponse.class);
+        ApiErrorResponse apiErrorResponse = objectMapper.convertValue(responseEntity.getBody(),ApiErrorResponse.class);
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND,responseEntity.getStatusCode());
+        assertEquals(USER_NOT_FOUND_ERROR.getErrorCode(),Integer.valueOf(apiErrorResponse.getCode()));
+        assertEquals(USER_NOT_FOUND_ERROR.getErrorMessage(),apiErrorResponse.getMessage());
 
     }
 
@@ -144,6 +284,36 @@ public class UserControllerTest {
         assertEquals(HttpStatus.OK,responseEntity.getStatusCode());
         assertEquals("name1",userResponse.getName());
         assertEquals(new BigDecimal("55000.0"),userResponse.getSalary());
+    }
+
+    @Test
+    public void getUsersShouldReturnUnauthorizedWhenWithoutBasicAuth(){
+        // Arrange
+
+        //Act
+        ResponseEntity<Object> responseEntity = restTemplate.getForEntity("/api/user/getUser/11111111111",Object.class);
+        LinkedHashMap<String,String> responseBodyLinkedHashMap = (LinkedHashMap<String, String>) responseEntity.getBody();
+
+        // Assert
+        assertEquals(HttpStatus.UNAUTHORIZED,responseEntity.getStatusCode());
+        assertEquals("Authentication Exception",responseBodyLinkedHashMap.get("errorMessage"));
+        assertEquals(String.valueOf(2003),responseBodyLinkedHashMap.get("errorCode"));
+        assertEquals(HttpStatus.UNAUTHORIZED.toString(),responseBodyLinkedHashMap.get("errorHttpStatus"));
+    }
+
+    @Test
+    public void getUsersShouldReturnNotFoundWhenRequestIsInvalid(){
+        // Arrange
+
+        //Act
+        ResponseEntity<ApiErrorResponse> responseEntity = restTemplate.withBasicAuth(userName,password).getForEntity("/api/user/getUser/45645645645",ApiErrorResponse.class);
+        ApiErrorResponse apiErrorResponse = objectMapper.convertValue(responseEntity.getBody(),ApiErrorResponse.class);
+
+
+        //Assert
+        assertEquals(HttpStatus.NOT_FOUND,responseEntity.getStatusCode());
+        assertEquals(USER_NOT_FOUND_ERROR.getErrorCode(),Integer.valueOf(apiErrorResponse.getCode()));
+        assertEquals(USER_NOT_FOUND_ERROR.getErrorMessage(),apiErrorResponse.getMessage());
     }
 
     private void generateUsersApplicationsAndScores() {
