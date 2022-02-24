@@ -4,7 +4,10 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.springframework.test.context.ActiveProfiles;
 
+
+@ActiveProfiles("test")
 public class TestInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     private static final int POSTGRESQL_PORT = 5432;
