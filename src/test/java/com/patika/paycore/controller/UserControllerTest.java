@@ -170,7 +170,7 @@ public class UserControllerTest {
         // Assert
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
         assertEquals(FIELD_VALIDATION_ERROR.getErrorCode(), Integer.valueOf(apiErrorResponse.getCode()));
-        assertEquals(FIELD_VALIDATION_ERROR.getErrorMessage(), apiErrorResponse.getMessage());
+        assertEquals("[Name can not be empty.]", apiErrorResponse.getMessage());
     }
 
     @Test
@@ -248,7 +248,7 @@ public class UserControllerTest {
         // Assert
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
         assertEquals(FIELD_VALIDATION_ERROR.getErrorCode(), Integer.valueOf(apiErrorResponse.getCode()));
-        assertEquals(FIELD_VALIDATION_ERROR.getErrorMessage(), apiErrorResponse.getMessage());
+        assertEquals("[IdentityNumber is invalid.]", apiErrorResponse.getMessage());
     }
 
     @Test
