@@ -63,7 +63,7 @@ public class ApplicationControllerTest {
 
         //Arrange
         ApplicationRequest applicationRequest = ApplicationRequest.builder()
-                .identityNumber("11111111113")
+                .identityNumber("50723818284")
                 .name("name3")
                 .surname("surname3")
                 .phoneNumber("7777777777")
@@ -107,7 +107,7 @@ public class ApplicationControllerTest {
         //Assert
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
         assertEquals(FIELD_VALIDATION_ERROR.getErrorCode(), Integer.valueOf(apiErrorResponse.getCode()));
-        assertEquals(FIELD_VALIDATION_ERROR.getErrorMessage(), apiErrorResponse.getMessage());
+        assertEquals("[Surname can not be empty., IdentityNumber is invalid.]", apiErrorResponse.getMessage());
 
     }
 
@@ -115,7 +115,7 @@ public class ApplicationControllerTest {
     public void createApplicationShouldReturnConfirmedApplicationResponseWhenRequestIsValid() {
         //Arrange
         ApplicationRequest applicationRequest = ApplicationRequest.builder()
-                .identityNumber("11111111111")
+                .identityNumber("39940637090")
                 .name("name1")
                 .surname("surname1")
                 .phoneNumber("5555555555")
@@ -133,7 +133,7 @@ public class ApplicationControllerTest {
         //Assert
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         assertEquals(ApplicationStatus.CONFIRMED, applicationResponse.getStatus());
-        assertEquals(new BigDecimal("20000"), applicationResponse.getCreditLimit());
+        assertEquals(new BigDecimal("220000.0"), applicationResponse.getCreditLimit());
 
     }
 
@@ -142,33 +142,31 @@ public class ApplicationControllerTest {
         //Arrange
 
         //Act
-        ResponseEntity<ApiResponse> responseEntity = restTemplate.getForEntity("/api/application/get-status/11111111111", ApiResponse.class);
+        ResponseEntity<ApiResponse> responseEntity = restTemplate.getForEntity("/api/application/get-status/15906301892", ApiResponse.class);
         List<ApplicationResponse> applicationResponses = objectMapper.convertValue(responseEntity.getBody().getData(), new TypeReference<List<ApplicationResponse>>() {
         });
 
         //Assert
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals(2, applicationResponses.size());
+        assertEquals(1, applicationResponses.size());
         assertEquals(ApplicationStatus.CONFIRMED, applicationResponses.get(0).getStatus());
-        assertEquals(ApplicationStatus.CONFIRMED, applicationResponses.get(1).getStatus());
         assertEquals(new BigDecimal("20000.0"), applicationResponses.get(0).getCreditLimit());
-        assertEquals(new BigDecimal("50000.0"), applicationResponses.get(1).getCreditLimit());
     }
 
 
     private void generateUsersApplicationsAndScores() {
         String userSql = "INSERT INTO users" +
                 "(id, created_date, updated_date, version, identity_number, name, phone_number, salary, surname)" +
-                "VALUES(1, now(), NULL, 0, '11111111111', 'name1', '5555555555', 55000.00, 'surname1');" +
+                "VALUES(1, now(), NULL, 0, '15906301892', 'name1', '5555555555', 55000.00, 'surname1');" +
                 "INSERT INTO users" +
                 "(id, created_date, updated_date, version, identity_number, name, phone_number, salary, surname)" +
-                "VALUES(2, now(), NULL, 0, '11111111112', 'name2', '6666666666', 4000.00, 'surname2');" +
+                "VALUES(2, now(), NULL, 0, '39940637090', 'name2', '6666666666', 4000.00, 'surname2');" +
                 "INSERT INTO users" +
                 "(id, created_date, updated_date, version, identity_number, name, phone_number, salary, surname)" +
-                "VALUES(3, now(), NULL, 0, '11111111113', 'name3', '7777777777', 77000.00, 'surname3');" +
+                "VALUES(3, now(), NULL, 0, '40940737598', 'name3', '7777777777', 77000.00, 'surname3');" +
                 "INSERT INTO users" +
                 "(id, created_date, updated_date, version, identity_number, name, phone_number, salary, surname)" +
-                "VALUES(4, now(), NULL, 0, '11111111114', 'name4', '8888888888', 88000.00, 'surname4');";
+                "VALUES(4, now(), NULL, 0, '20680889696', 'name4', '8888888888', 88000.00, 'surname4');";
 
         String applicationSql = "INSERT INTO application" +
                 "(id, created_date, updated_date, version, application_status, credit_limit, user_id)" +
@@ -181,17 +179,14 @@ public class ApplicationControllerTest {
                 "VALUES(3, now(), NULL, 0, 0, 0.00, 3);" +
                 "INSERT INTO application" +
                 "(id, created_date, updated_date, version, application_status, credit_limit, user_id)" +
-                "VALUES(4, now(), NULL, 0, 0, 0.00, 4);" +
-                "INSERT INTO application" +
-                "(id, created_date, updated_date, version, application_status, credit_limit, user_id)" +
-                "VALUES(5, now(), NULL, 0, 1, 50000.00, 1);";
+                "VALUES(4, now(), NULL, 0, 0, 0.00, 4);";
 
         String scoreSql = "INSERT INTO score" +
                 "(id, created_date, updated_date, version, identity_number, score)" +
-                "VALUES(1, now(),NULL, NULL, '11111111111', 750);" +
+                "VALUES(1, now(),NULL, NULL, '15906301892', 750);" +
                 "INSERT INTO score" +
                 "(id, created_date, updated_date, version, identity_number, score)" +
-                "VALUES(2, now(),NULL, NULL, '11111111112', 1200);";
+                "VALUES(2, now(),NULL, NULL, '39940637090', 1200);";
 
         jdbcTemplate.execute(userSql);
         jdbcTemplate.execute(applicationSql);
