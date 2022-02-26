@@ -1,5 +1,6 @@
 package com.patika.paycore.entity;
 
+import com.patika.paycore.entity.validation.IdentityNumber;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
@@ -7,6 +8,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,8 +26,7 @@ public class User extends BaseEntity {
     @SequenceGenerator(name = "user_seq_gen", sequenceName = "user_seq", allocationSize = 1)
     private Long id;
 
-    @NotNull(message = "Identity number can not be empty.")
-    @Length(min = 11, max = 11, message = "Identity number must have 11 characters.")
+    @IdentityNumber
     private String identityNumber;
 
     @NotEmpty(message = "Name can not be empty.")
@@ -35,6 +36,8 @@ public class User extends BaseEntity {
     private String surname;
 
     @NotEmpty(message = "Surname can not be empty.")
+    @Length(min = 10, max = 10, message = "Number must be 10 characters")
+    @Pattern(regexp = "^(0|[1-9][0-9]*)$")
     private String phoneNumber;
 
     @NotNull(message = "Salary can not be empty.")

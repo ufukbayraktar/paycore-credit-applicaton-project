@@ -5,6 +5,7 @@ import com.patika.paycore.model.request.UserCreateRequest;
 import com.patika.paycore.model.request.UserUpdateRequest;
 import com.patika.paycore.model.response.UserResponse;
 import com.patika.paycore.service.UserService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +16,7 @@ import javax.validation.Valid;
 @RequestMapping("api/user")
 @RequiredArgsConstructor
 @Slf4j
+@SecurityRequirement(name = "api/user")
 public class UserController {
 
     private final UserService userService;

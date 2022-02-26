@@ -4,27 +4,28 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.patika.paycore.TestInitializer;
 import com.patika.paycore.enums.ApplicationStatus;
+import com.patika.paycore.model.ApiErrorResponse;
 import com.patika.paycore.model.ApiResponse;
 import com.patika.paycore.model.request.ApplicationRequest;
 import com.patika.paycore.model.response.ApplicationResponse;
-import com.patika.paycore.model.response.UserResponse;
 import com.patika.paycore.repository.ApplicationRepository;
 import com.patika.paycore.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
 import java.util.List;
+
+import static com.patika.paycore.exception.ApiErrorType.FIELD_VALIDATION_ERROR;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ContextConfiguration(initializers = TestInitializer.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -53,7 +54,9 @@ public class ApplicationControllerTest {
     }
 
     @AfterEach
-    void tearDown() { clearDatabases(); }
+    void tearDown() {
+        clearDatabases();
+    }
 
     @Test
     public void createApplicationShouldReturnRejectedApplicationResponseWhenRequestIsValid() {
@@ -67,20 +70,47 @@ public class ApplicationControllerTest {
                 .salary(new BigDecimal("77000")).build();
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-        httpHeaders.add(HttpHeaders.ACCEPT,MediaType.APPLICATION_JSON_VALUE);
+        httpHeaders.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
 
-        HttpEntity<Object> request = new HttpEntity<>(applicationRequest,httpHeaders);
+        HttpEntity<Object> request = new HttpEntity<>(applicationRequest, httpHeaders);
 
         //Act
-        ResponseEntity<ApiResponse> responseEntity = restTemplate.postForEntity("/api/application/create",request,ApiResponse.class);
-        ApplicationResponse applicationResponse = objectMapper.convertValue(responseEntity.getBody().getData(),ApplicationResponse.class);
+        ResponseEntity<ApiResponse> responseEntity = restTemplate.postForEntity("/api/application/create", request, ApiResponse.class);
+        ApplicationResponse applicationResponse = objectMapper.convertValue(responseEntity.getBody().getData(), ApplicationResponse.class);
 
         //Assert
-        assertEquals(HttpStatus.OK,responseEntity.getStatusCode());
-        assertEquals(ApplicationStatus.REJECTED,applicationResponse.getStatus());
-        assertEquals(new BigDecimal("0"),applicationResponse.getCreditLimit());
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(ApplicationStatus.REJECTED, applicationResponse.getStatus());
+        assertEquals(new BigDecimal("0"), applicationResponse.getCreditLimit());
 
     }
+
+    @Test
+    public void createApplicationShouldReturnNotFoundResponseWhenRequestIsInValid() {
+
+        //Arrange
+        ApplicationRequest applicationRequest = ApplicationRequest.builder()
+                .identityNumber("11111111113")
+                .name("name3")
+                .phoneNumber("7777777777")
+                .salary(new BigDecimal("77000")).build();
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        httpHeaders.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
+
+        HttpEntity<Object> request = new HttpEntity<>(applicationRequest, httpHeaders);
+
+        //Act
+        ResponseEntity<ApiErrorResponse> responseEntity = restTemplate.postForEntity("/api/application/create", request, ApiErrorResponse.class);
+        ApiErrorResponse apiErrorResponse = objectMapper.convertValue(responseEntity.getBody(), ApiErrorResponse.class);
+
+        //Assert
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        assertEquals(FIELD_VALIDATION_ERROR.getErrorCode(), Integer.valueOf(apiErrorResponse.getCode()));
+        assertEquals(FIELD_VALIDATION_ERROR.getErrorMessage(), apiErrorResponse.getMessage());
+
+    }
+
     @Test
     public void createApplicationShouldReturnConfirmedApplicationResponseWhenRequestIsValid() {
         //Arrange
@@ -92,18 +122,18 @@ public class ApplicationControllerTest {
                 .salary(new BigDecimal("55000.00")).build();
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-        httpHeaders.add(HttpHeaders.ACCEPT,MediaType.APPLICATION_JSON_VALUE);
+        httpHeaders.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
 
-        HttpEntity<Object> request = new HttpEntity<>(applicationRequest,httpHeaders);
+        HttpEntity<Object> request = new HttpEntity<>(applicationRequest, httpHeaders);
 
         //Act
-        ResponseEntity<ApiResponse> responseEntity = restTemplate.postForEntity("/api/application/create",request,ApiResponse.class);
-        ApplicationResponse applicationResponse = objectMapper.convertValue(responseEntity.getBody().getData(),ApplicationResponse.class);
+        ResponseEntity<ApiResponse> responseEntity = restTemplate.postForEntity("/api/application/create", request, ApiResponse.class);
+        ApplicationResponse applicationResponse = objectMapper.convertValue(responseEntity.getBody().getData(), ApplicationResponse.class);
 
         //Assert
-        assertEquals(HttpStatus.OK,responseEntity.getStatusCode());
-        assertEquals(ApplicationStatus.CONFIRMED,applicationResponse.getStatus());
-        assertEquals(new BigDecimal("20000"),applicationResponse.getCreditLimit());
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(ApplicationStatus.CONFIRMED, applicationResponse.getStatus());
+        assertEquals(new BigDecimal("20000"), applicationResponse.getCreditLimit());
 
     }
 
@@ -112,16 +142,17 @@ public class ApplicationControllerTest {
         //Arrange
 
         //Act
-        ResponseEntity<ApiResponse> responseEntity = restTemplate.getForEntity("/api/application/get-status/11111111111",ApiResponse.class);
-        List<ApplicationResponse> applicationResponses = objectMapper.convertValue(responseEntity.getBody().getData(), new TypeReference<List<ApplicationResponse>>() {});
+        ResponseEntity<ApiResponse> responseEntity = restTemplate.getForEntity("/api/application/get-status/11111111111", ApiResponse.class);
+        List<ApplicationResponse> applicationResponses = objectMapper.convertValue(responseEntity.getBody().getData(), new TypeReference<List<ApplicationResponse>>() {
+        });
 
         //Assert
-        assertEquals(HttpStatus.OK,responseEntity.getStatusCode());
-        assertEquals(2,applicationResponses.size());
-        assertEquals(ApplicationStatus.CONFIRMED,applicationResponses.get(0).getStatus());
-        assertEquals(ApplicationStatus.CONFIRMED,applicationResponses.get(1).getStatus());
-        assertEquals(new BigDecimal("20000.0"),applicationResponses.get(0).getCreditLimit());
-        assertEquals(new BigDecimal("50000.0"),applicationResponses.get(1).getCreditLimit());
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(2, applicationResponses.size());
+        assertEquals(ApplicationStatus.CONFIRMED, applicationResponses.get(0).getStatus());
+        assertEquals(ApplicationStatus.CONFIRMED, applicationResponses.get(1).getStatus());
+        assertEquals(new BigDecimal("20000.0"), applicationResponses.get(0).getCreditLimit());
+        assertEquals(new BigDecimal("50000.0"), applicationResponses.get(1).getCreditLimit());
     }
 
 
@@ -153,7 +184,7 @@ public class ApplicationControllerTest {
                 "VALUES(4, now(), NULL, 0, 0, 0.00, 4);" +
                 "INSERT INTO application" +
                 "(id, created_date, updated_date, version, application_status, credit_limit, user_id)" +
-                "VALUES(5, now(), NULL, 0, 1, 50000.00, 1);" ;
+                "VALUES(5, now(), NULL, 0, 1, 50000.00, 1);";
 
         String scoreSql = "INSERT INTO score" +
                 "(id, created_date, updated_date, version, identity_number, score)" +

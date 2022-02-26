@@ -8,6 +8,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.util.stream.Collectors;
+
 @Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -43,7 +45,7 @@ public class GlobalExceptionHandler {
                 ApiErrorType.FIELD_VALIDATION_ERROR.getErrorMessage());
 
         return createErrorResponse(ApiErrorType.FIELD_VALIDATION_ERROR.getHttpStatus(),
-                ApiErrorType.FIELD_VALIDATION_ERROR.getErrorMessage(),
+                exception.getFieldErrors().stream().map(fieldError -> fieldError.getDefaultMessage()).collect(Collectors.toList()).toString(),
                 ApiErrorType.FIELD_VALIDATION_ERROR.getErrorCode());
     }
 
@@ -52,6 +54,7 @@ public class GlobalExceptionHandler {
         ApiErrorResponse apiErrorResponse = ApiErrorResponse.builder()
                 .code(String.valueOf(errorCode))
                 .message(errorMessage)
+                .status(httpStatus)
                 .build();
         return ResponseEntity.
                 status(httpStatus).

@@ -1,6 +1,5 @@
 package com.patika.paycore.exception;
 
-
 import org.springframework.http.HttpStatus;
 
 public class UserNotFoundException extends BaseRuntimeException {

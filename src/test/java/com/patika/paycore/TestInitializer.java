@@ -14,13 +14,13 @@ public class TestInitializer implements ApplicationContextInitializer<Configurab
             .withInitScript("schema-test.sql")
             .withDatabaseName("test")
             .withExposedPorts(POSTGRESQL_PORT)
-            .withEnv("TZ","UTC")
+            .withEnv("TZ", "UTC")
             .withReuse(true);
 
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
         postgreSQLContainer.start();
         String databaseHost = "DATABASE_URL=" + postgreSQLContainer.getJdbcUrl();
-        TestPropertySourceUtils.addInlinedPropertiesToEnvironment(applicationContext,databaseHost);
+        TestPropertySourceUtils.addInlinedPropertiesToEnvironment(applicationContext, databaseHost);
     }
 }

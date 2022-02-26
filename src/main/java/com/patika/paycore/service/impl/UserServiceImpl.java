@@ -24,22 +24,29 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponse createUser(UserCreateRequest request) {
-        User user = User.builder()
-                .identityNumber(request.getIdentityNumber())
-                .name(request.getName())
-                .surname(request.getSurname())
-                .phoneNumber(request.getPhoneNumber())
-                .salary(request.getSalary())
-                .build();
-        userRepository.save(user);
-        log.info("User saved: {}", user);
-        return UserResponse.builder()
-                .identityNumber(user.getIdentityNumber())
-                .name(user.getName())
-                .surname(user.getSurname())
-                .phoneNumber(user.getPhoneNumber())
-                .salary(user.getSalary())
-                .build();
+        Optional<User> userPresent = userRepository.findByIdentityNumber(request.getIdentityNumber());
+        if (userPresent.isPresent()) {
+            throw new UserNotFoundException(ApiErrorType.USER_EXISTS_ERROR.getErrorCode(),
+                    ApiErrorType.USER_EXISTS_ERROR.getErrorMessage(),
+                    ApiErrorType.USER_EXISTS_ERROR.getHttpStatus());
+        } else {
+            User user = User.builder()
+                    .identityNumber(request.getIdentityNumber())
+                    .name(request.getName())
+                    .surname(request.getSurname())
+                    .phoneNumber(request.getPhoneNumber())
+                    .salary(request.getSalary())
+                    .build();
+            userRepository.save(user);
+            log.info("User saved: {}", user);
+            return UserResponse.builder()
+                    .identityNumber(user.getIdentityNumber())
+                    .name(user.getName())
+                    .surname(user.getSurname())
+                    .phoneNumber(user.getPhoneNumber())
+                    .salary(user.getSalary())
+                    .build();
+        }
     }
 
     @Override
