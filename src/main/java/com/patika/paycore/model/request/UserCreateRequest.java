@@ -28,7 +28,7 @@ public class UserCreateRequest {
 
     @NotEmpty(message = "Surname can not be empty.")
     @Length(min = 10, max = 10, message = "Number must be 10 characters")
-    @Pattern(regexp = "^(0|[1-9][0-9]*)$")
+    @Pattern(regexp = "^(0|[1-9][0-9]*)$", message = "PhoneNumber must contain numbers only")
     private String phoneNumber;
 
     @NotNull(message = "Salary can not be empty.")

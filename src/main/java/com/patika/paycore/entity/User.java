@@ -36,8 +36,8 @@ public class User extends BaseEntity {
     private String surname;
 
     @NotEmpty(message = "Surname can not be empty.")
-    @Length(min = 10, max = 10, message = "Number must be 10 characters")
-    @Pattern(regexp = "^(0|[1-9][0-9]*)$")
+    @Length(min = 10, max = 10, message = "PhoneNumber must be 10 characters")
+    @Pattern(regexp = "^(0|[1-9][0-9]*)$", message = "PhoneNumber must contain numbers only")
     private String phoneNumber;
 
     @NotNull(message = "Salary can not be empty.")
